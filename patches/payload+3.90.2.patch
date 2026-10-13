@@ -1,0 +1,17 @@
+diff --git a/node_modules/payload/dist/bin/loadEnv.js b/node_modules/payload/dist/bin/loadEnv.js
+index b61ecc1..c487ea7 100644
+--- a/node_modules/payload/dist/bin/loadEnv.js
++++ b/node_modules/payload/dist/bin/loadEnv.js
+@@ -1,6 +1,10 @@
+-import nextEnvImport from '@next/env';
++import * as nextEnvNS from '@next/env';
+ import { findUpSync } from '../utilities/findUp.js';
+-const { loadEnvConfig } = nextEnvImport;
++// Different loaders (tsx/Node vs. Next's own Turbopack externals) disagree
++// on whether @next/env's CJS build exposes loadEnvConfig as a named export
++// or nested under .default — a namespace import works under both, so check
++// all the shapes it might take instead of a named/default import.
++const loadEnvConfig = nextEnvNS.loadEnvConfig ?? nextEnvNS.default?.loadEnvConfig ?? nextEnvNS.default;
+ /**
+  * Try to find user's env files and load it. Uses the same algorithm next.js uses to parse env files, meaning this also supports .env.local, .env.development, .env.production, etc.
+  */ export function loadEnv(path) {

@@ -34,25 +34,27 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// The actual <html>/<body> root layout is src/app/(payload)/layout.tsx —
+// Payload's admin panel needs to own those tags, so this nested layout only
+// wraps the frontend route tree and contributes metadata for it.
+export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN">
+    <>
+      {/* React 19 hoists this to <head> on its own, even rendered from a nested layout. */}
       <head>
         {/* Without JavaScript, scroll-reveal content must still be visible. */}
         <noscript>
           <style>{`[style*="opacity:0"]{opacity:1!important;transform:none!important;clip-path:none!important;filter:none!important}`}</style>
         </noscript>
       </head>
-      <body>
-        <MotionProvider>
-          <Navbar />
-          <main id="main" tabIndex={-1} className="outline-none">
-            {children}
-          </main>
-          <Footer />
-          <FloatingWhatsApp />
-        </MotionProvider>
-      </body>
-    </html>
+      <MotionProvider>
+        <Navbar />
+        <main id="main" tabIndex={-1} className="outline-none">
+          {children}
+        </main>
+        <Footer />
+        <FloatingWhatsApp />
+      </MotionProvider>
+    </>
   );
 }
