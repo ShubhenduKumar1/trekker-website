@@ -1,11 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
+import { siteUrl } from "@/lib/site-url";
 
 /** Mirrors src/data/destinations.ts. Powers /destinations/[slug]. */
 export const Destinations: CollectionConfig = {
   slug: "destinations",
   admin: {
     useAsTitle: "state",
+    livePreview: {
+      url: ({ data }) => `${siteUrl()}/destinations/${data.slug}`,
+    },
+    preview: (data) => `${siteUrl()}/destinations/${data.slug}`,
   },
   access: {
     read: () => true,

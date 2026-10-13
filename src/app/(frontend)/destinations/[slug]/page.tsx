@@ -15,6 +15,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CtaCard, onAccent } from "@/components/ui/CtaCard";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { RefreshRouteOnSave } from "@/components/payload/RefreshRouteOnSave";
 import { btn, arrowNudge } from "@/lib/ui";
 import { cn } from "@/lib/format";
 
@@ -59,6 +60,7 @@ export default async function DestinationPage({ params }: Props) {
 
   return (
     <>
+      <RefreshRouteOnSave />
       <PageHeader eyebrow={d.eyebrow} title={`Trekking in ${d.state}.`} titleMuted={d.tagline} intro={d.intro} image={d.image}>
         <p className="text-sm font-medium text-muted">
           {treks.length === 0 ? "Treks coming soon" : `${treks.length} ${treks.length === 1 ? "trek" : "treks"} in this region`}

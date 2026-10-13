@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
+import { siteUrl } from "@/lib/site-url";
 
 /** Mirrors src/types/trek.ts (Trek) and src/data/treks.ts. */
 export const Treks: CollectionConfig = {
@@ -7,6 +8,10 @@ export const Treks: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "state", "difficulty", "status"],
+    livePreview: {
+      url: ({ data }) => `${siteUrl()}/treks/${data.slug}`,
+    },
+    preview: (data) => `${siteUrl()}/treks/${data.slug}`,
   },
   access: {
     read: () => true,

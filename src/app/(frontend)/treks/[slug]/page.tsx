@@ -40,6 +40,7 @@ import { MobileBookingBar } from "@/components/booking/MobileBookingBar";
 import { PackageSelector } from "@/components/booking/PackageSelector";
 import { PackingList } from "@/components/trek/PackingList";
 import { FaqList } from "@/components/trek/FaqList";
+import { RefreshRouteOnSave } from "@/components/payload/RefreshRouteOnSave";
 
 // Known treks are pre-rendered at build time; a trek added later in /admin
 // renders on first request and is then cached (see revalidate in layout.tsx).
@@ -102,6 +103,7 @@ export default async function TrekPage({ params }: Props) {
 
   return (
     <BookingProvider trek={trek} whatsappNumber={settings.whatsappNumber}>
+      <RefreshRouteOnSave />
       <BreadcrumbJsonLd trek={trek} siteUrl={settings.siteUrl} />
 
       {/* ── A. Hero ─────────────────────────────────────────────────────── */}

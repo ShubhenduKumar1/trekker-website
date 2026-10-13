@@ -4,12 +4,10 @@
  * for the same reason as src/lib/treks.ts — generate:types isn't runnable
  * yet (see payload.config.ts's comment near the db adapter).
  */
+import { siteUrl } from "./site-url";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- placeholder for Payload's generated doc type
 type AnyDoc = Record<string, any>;
-
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-}
 
 export function generateSeoTitle({ doc, collectionSlug }: { doc: AnyDoc; collectionSlug?: string }): string {
   if (collectionSlug === "treks") return `${doc.name} — ${doc.state}`;
