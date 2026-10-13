@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /**
  * Uploaded images (trek covers, gallery photos, guide portrait, logo, …).
@@ -10,6 +11,10 @@ export const Media: CollectionConfig = {
   slug: "media",
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   upload: {
     staticDir: "media",

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site";
 
 /** Absolute URL helper — returns null when no production domain is configured. */
-export function absoluteUrl(path = "/"): string | null {
-  if (!siteConfig.siteUrl) return null;
-  return `${siteConfig.siteUrl.replace(/\/$/, "")}${path}`;
+export function absoluteUrl(path = "/", siteUrl: string | null): string | null {
+  if (!siteUrl) return null;
+  return `${siteUrl.replace(/\/$/, "")}${path}`;
 }
 
 type PageMeta = {
@@ -12,10 +11,12 @@ type PageMeta = {
   description: string;
   path: string;
   image?: { src: string; alt: string };
+  siteUrl: string | null;
+  brandName: string;
 };
 
-export function pageMetadata({ title, description, path, image }: PageMeta): Metadata {
-  const canonical = absoluteUrl(path);
+export function pageMetadata({ title, description, path, image, siteUrl, brandName }: PageMeta): Metadata {
+  const canonical = absoluteUrl(path, siteUrl);
   const ogImage = image ? [{ url: ogImageUrl(image.src), alt: image.alt, width: 1200, height: 630 }] : undefined;
   return {
     title,
@@ -25,7 +26,7 @@ export function pageMetadata({ title, description, path, image }: PageMeta): Met
       title,
       description,
       type: "website",
-      siteName: siteConfig.brandName,
+      siteName: brandName,
       locale: "en_IN",
       ...(canonical ? { url: canonical } : {}),
       ...(ogImage ? { images: ogImage } : {}),

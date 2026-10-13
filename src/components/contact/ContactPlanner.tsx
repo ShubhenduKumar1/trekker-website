@@ -4,7 +4,7 @@ import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { buildWhatsAppLink, planningEnquiryMessage, type PlanningEnquiry } from "@/lib/whatsapp";
-import { isDev } from "@/config/site";
+import { isDev } from "@/lib/env";
 import { btn } from "@/lib/ui";
 import { cn } from "@/lib/format";
 
@@ -14,12 +14,12 @@ const fieldCls =
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Flexible"];
 
 /** Builds a WhatsApp planning message from a few optional choices. No data is sent anywhere by this page. */
-export function ContactPlanner() {
+export function ContactPlanner({ whatsappNumber }: { whatsappNumber: string | null }) {
   const id = useId();
   const [form, setForm] = useState<PlanningEnquiry>({});
   const set = (k: keyof PlanningEnquiry) => (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value || undefined }));
-  const link = useMemo(() => buildWhatsAppLink(planningEnquiryMessage(form)), [form]);
+  const link = useMemo(() => buildWhatsAppLink(planningEnquiryMessage(form), whatsappNumber), [form, whatsappNumber]);
 
   const select = (key: keyof PlanningEnquiry, label: string, options: string[], placeholder = "No preference") => (
     <div>
@@ -68,7 +68,7 @@ export function ContactPlanner() {
       ) : (
         <div className="mt-6 rounded-xl bg-canvas p-4 text-sm text-ink/80">
           {isDev ? (
-            <>WhatsApp isn’t configured yet. Set <code>NEXT_PUBLIC_WHATSAPP_NUMBER</code> to enable this button.</>
+            <>WhatsApp isn’t configured yet. Set a number in <code>/admin → Site Settings</code> to enable this button.</>
           ) : (
             <>
               WhatsApp enquiries are being set up. In the meantime, browse the{" "}

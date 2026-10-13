@@ -6,8 +6,10 @@ import { buildWhatsAppLink, generalEnquiryMessage } from "@/lib/whatsapp";
  * "Plan your adventure" style CTA: opens a general WhatsApp enquiry when a
  * number is configured, otherwise scrolls/navigates to the planning section.
  */
-export function PlanLink({ children, className, fallbackHref = "/contact" }: { children: React.ReactNode; className?: string; fallbackHref?: string }) {
-  const link = buildWhatsAppLink(generalEnquiryMessage());
+type Props = { children: React.ReactNode; className?: string; fallbackHref?: string; whatsappNumber: string | null };
+
+export function PlanLink({ children, className, fallbackHref = "/contact", whatsappNumber }: Props) {
+  const link = buildWhatsAppLink(generalEnquiryMessage(), whatsappNumber);
   if (link.configured) {
     return (
       <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>

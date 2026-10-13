@@ -19,7 +19,7 @@ export function PolicyPage({ title, paragraphs, configKey }: { title: string; pa
               <p>
                 Questions in the meantime? <Link href="/contact" className="font-semibold text-accent underline underline-offset-4">Get in touch</Link>.
               </p>
-              <DevNotice>Add the policy text to siteConfig.policies.{configKey} in src/config/site.ts.</DevNotice>
+              <DevNotice>Add the policy text in /admin → Site Settings → Policies ({configKey}).</DevNotice>
             </>
           )}
         </div>

@@ -1,7 +1,7 @@
 /**
- * One-time migration: reads the existing static content (src/data/*.ts,
- * src/config/site.ts) and writes it into Payload, so the sample treks and
- * current settings carry over instead of being retyped by hand in /admin.
+ * One-time migration: reads the existing static content (src/data/*.ts) and
+ * writes it into Payload, so the sample treks, destinations, FAQs, gallery
+ * and testimonials carry over instead of being retyped by hand in /admin.
  *
  * Run once a real DATABASE_URI is set:
  *   npm run migrate:seed
@@ -23,7 +23,6 @@ import { destinations as sourceDestinations } from "../data/destinations";
 import { generalFaqs } from "../data/faqs";
 import { testimonials as sourceTestimonials } from "../data/testimonials";
 import { gallery as sourceGallery } from "../data/gallery";
-import { siteConfig } from "../config/site";
 import type { Photo } from "../types/trek";
 
 // `payload run` normally loads .env.local for you; doing that ourselves here.
@@ -108,7 +107,6 @@ async function run() {
   }
 
   console.log(`Seeding ${sourceTreks.length} treks...`);
-  const trekIdBySlug = new Map<string, string | number>();
   for (const t of sourceTreks) {
     const coverImage = await uploadPhoto(t.coverImage);
     const gallery = [];
@@ -134,7 +132,7 @@ async function run() {
       });
     }
 
-    const doc = await payload.create({
+    await payload.create({
       collection: "treks",
       data: {
         slug: t.slug,
@@ -181,7 +179,6 @@ async function run() {
         status: t.status,
       },
     });
-    trekIdBySlug.set(t.slug, doc.id);
   }
 
   console.log(`Seeding ${sourceGallery.length} gallery items...`);
@@ -205,41 +202,10 @@ async function run() {
     }
   }
 
-  console.log("Updating site settings...");
-  const guidePortrait = siteConfig.guide.portrait ? await uploadPhoto(siteConfig.guide.portrait) : undefined;
-  const logo = siteConfig.logoSrc
-    ? await uploadPhoto({ src: siteConfig.logoSrc, alt: `${siteConfig.brandName} logo` })
-    : undefined;
-
-  await payload.updateGlobal({
-    slug: "site-settings",
-    data: {
-      brandName: siteConfig.brandName,
-      wordmark: siteConfig.wordmark,
-      logo,
-      tagline: siteConfig.tagline,
-      description: siteConfig.description,
-      whatsappNumber: siteConfig.whatsappNumber ?? undefined,
-      email: siteConfig.email ?? undefined,
-      phoneDisplay: siteConfig.phoneDisplay ?? undefined,
-      baseLocation: siteConfig.baseLocation ?? undefined,
-      heroTrekSlug: trekIdBySlug.get(siteConfig.heroTrekSlug),
-      social: siteConfig.social,
-      guide: {
-        name: siteConfig.guide.name ?? undefined,
-        portrait: guidePortrait,
-        intro: siteConfig.guide.intro.map((text) => ({ text })),
-        whyTrekking: siteConfig.guide.whyTrekking ?? undefined,
-        philosophy: siteConfig.guide.philosophy ?? undefined,
-        credentials: siteConfig.guide.credentials.map((value) => ({ value })),
-      },
-      policies: {
-        terms: siteConfig.policies.terms?.map((text) => ({ text })) ?? [],
-        cancellation: siteConfig.policies.cancellation?.map((text) => ({ text })) ?? [],
-        emergencyContact: siteConfig.policies.emergencyContact ?? undefined,
-      },
-    },
-  });
+  // Site settings (brand, contact, guide profile, policies) aren't seeded
+  // from code — edit them directly in /admin → Site Settings. They were a
+  // one-time hand migration from the old src/config/site.ts, which no longer
+  // exists now that the frontend reads settings from Payload.
 
   console.log("Seed complete. Visit /admin to create your admin login, then review the imported content.");
   process.exit(0);

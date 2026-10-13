@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { siteConfig } from "@/config/site";
-import { destinations } from "@/data/destinations";
+import { getSiteSettings } from "@/lib/site-settings";
+import { getDestinations } from "@/lib/destinations";
 import { buildWhatsAppLink, generalEnquiryMessage } from "@/lib/whatsapp";
 import { Wordmark } from "@/components/layout/Wordmark";
 import { CurrentYear } from "@/components/layout/CurrentYear";
@@ -9,9 +9,10 @@ import { DevNotice } from "@/components/ui/DevNotice";
 
 const linkCls = "text-sm text-muted transition-colors hover:text-ink";
 
-export function Footer() {
-  const wa = buildWhatsAppLink(generalEnquiryMessage());
-  const { email, phoneDisplay, baseLocation, social, policies } = siteConfig;
+export async function Footer() {
+  const [settings, destinations] = await Promise.all([getSiteSettings(), getDestinations()]);
+  const wa = buildWhatsAppLink(generalEnquiryMessage(), settings.whatsappNumber);
+  const { email, phoneDisplay, baseLocation, social, policies, brandName, tagline, logoSrc, wordmark } = settings;
 
   const contact = [
     wa.configured && { label: "WhatsApp", href: wa.href, external: true },
@@ -24,8 +25,8 @@ export function Footer() {
       <div className="container-page">
         <div className="grid gap-12 border-t border-line pt-14 pb-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-xs">
-            <Wordmark />
-            <p className="mt-4 text-sm leading-relaxed text-muted">{siteConfig.tagline}.</p>
+            <Wordmark logoSrc={logoSrc} brandName={brandName} wordmark={wordmark} />
+            <p className="mt-4 text-sm leading-relaxed text-muted">{tagline}.</p>
             {baseLocation && <p className="mt-2 text-sm text-muted">{baseLocation}</p>}
           </div>
 
@@ -95,14 +96,14 @@ export function Footer() {
               </p>
             )}
             {!(wa.configured || email) && social.length === 0 && (
-              <DevNotice className="mt-4">Add WhatsApp, email and social links in src/config/site.ts / .env.</DevNotice>
+              <DevNotice className="mt-4">Add WhatsApp, email and social links in /admin → Site Settings.</DevNotice>
             )}
           </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-line py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © <CurrentYear /> {siteConfig.brandName}
+            © <CurrentYear /> {brandName}
           </p>
           <ul className="flex flex-wrap gap-x-5 gap-y-2">
             <li>

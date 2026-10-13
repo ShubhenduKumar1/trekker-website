@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Award } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { photos } from "@/data/images";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Reveal } from "@/components/ui/Reveal";
@@ -14,8 +14,14 @@ const FALLBACK_INTRO = [
   "Get in touch to talk through what kind of mountain experience you’re looking for.",
 ];
 
-export function GuideSection({ headingLevel = "h2", showAboutLink = true }: { headingLevel?: "h1" | "h2"; showAboutLink?: boolean }) {
-  const { guide, social } = siteConfig;
+export async function GuideSection({
+  headingLevel = "h2",
+  showAboutLink = true,
+}: {
+  headingLevel?: "h1" | "h2";
+  showAboutLink?: boolean;
+}) {
+  const { guide, social, whatsappNumber } = await getSiteSettings();
   const H = headingLevel;
   const intro = guide.intro.length ? guide.intro : FALLBACK_INTRO;
   const image = guide.portrait ?? photos.moonRange;
@@ -86,12 +92,14 @@ export function GuideSection({ headingLevel = "h2", showAboutLink = true }: { he
 
             {missing.length > 0 && (
               <DevNotice className="mt-6 max-w-xl">
-                Add your {missing.join(", ")} in <code>siteConfig.guide</code> (src/config/site.ts). Visitors see neutral copy until then.
+                Add your {missing.join(", ")} in /admin → Site Settings → Guide. Visitors see neutral copy until then.
               </DevNotice>
             )}
 
             <div className="mt-8 flex flex-wrap items-center gap-2">
-              <PlanLink className={btn.primary}>Plan Your Trek With Me</PlanLink>
+              <PlanLink className={btn.primary} whatsappNumber={whatsappNumber}>
+                Plan Your Trek With Me
+              </PlanLink>
               {showAboutLink && (
                 <Link href="/about" className={btn.secondary}>
                   More about me

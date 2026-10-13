@@ -19,11 +19,12 @@ import {
   Users,
 } from "lucide-react";
 import type { Trek } from "@/types/trek";
-import { getAllTreks, getRelatedTreks, getStartingPrice, getTrekBySlug } from "@/lib/treks";
-import { getDestinationByState } from "@/data/destinations";
+import { getAllTreks, getRelatedTreks, getTrekBySlug } from "@/lib/treks";
+import { getStartingPrice } from "@/lib/trek-pricing";
+import { getDestinationByState } from "@/lib/destinations";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
 import { formatAltitude, formatDistance, formatDuration, formatPrice, PRICE_FALLBACK, cn } from "@/lib/format";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { btn } from "@/lib/ui";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Reveal } from "@/components/ui/Reveal";
@@ -39,23 +40,26 @@ import { PackageSelector } from "@/components/booking/PackageSelector";
 import { PackingList } from "@/components/trek/PackingList";
 import { FaqList } from "@/components/trek/FaqList";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return getAllTreks().map((t) => ({ slug: t.slug }));
+// Known treks are pre-rendered at build time; a trek added later in /admin
+// renders on first request and is then cached (see revalidate in layout.tsx).
+export async function generateStaticParams() {
+  const treks = await getAllTreks();
+  return treks.map((t) => ({ slug: t.slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const trek = getTrekBySlug(slug);
+  const [trek, settings] = await Promise.all([getTrekBySlug(slug), getSiteSettings()]);
   if (!trek) return { title: "Trek not found" };
   return pageMetadata({
     title: `${trek.name} — ${trek.state}`,
     description: `${trek.summary} ${formatDuration(trek.durationDays)}, ${trek.difficulty.toLowerCase()} difficulty. View the itinerary and enquire on WhatsApp.`,
     path: `/treks/${trek.slug}`,
     image: trek.coverImage,
+    siteUrl: settings.siteUrl,
+    brandName: settings.brandName,
   });
 }
 
@@ -70,20 +74,23 @@ const SECTIONS = [
 
 export default async function TrekPage({ params }: Props) {
   const { slug } = await params;
-  const trek = getTrekBySlug(slug);
+  const trek = await getTrekBySlug(slug);
   if (!trek) notFound();
 
-  const destination = getDestinationByState(trek.state);
+  const [destination, related, settings] = await Promise.all([
+    getDestinationByState(trek.state),
+    getRelatedTreks(trek),
+    getSiteSettings(),
+  ]);
   const price = formatPrice(getStartingPrice(trek));
   const altitude = formatAltitude(trek.maxAltitudeM);
-  const related = getRelatedTreks(trek);
   const sections = SECTIONS.filter((s) => s.id !== "packing" || trek.packingList.length > 0).filter(
     (s) => s.id !== "faq" || trek.faqs.length > 0,
   );
 
   return (
-    <BookingProvider trek={trek}>
-      <BreadcrumbJsonLd trek={trek} />
+    <BookingProvider trek={trek} whatsappNumber={settings.whatsappNumber}>
+      <BreadcrumbJsonLd trek={trek} siteUrl={settings.siteUrl} />
 
       {/* ── A. Hero ─────────────────────────────────────────────────────── */}
       <section aria-labelledby="trek-title" className="relative isolate overflow-hidden pt-32 sm:pt-40">
@@ -273,10 +280,10 @@ export default async function TrekPage({ params }: Props) {
                   </li>
                 ))}
               </ul>
-              {siteConfig.policies.emergencyContact && (
+              {settings.policies.emergencyContact && (
                 <p className="mt-6 rounded-2xl bg-tint-rose p-5">
                   <span className="eyebrow block text-muted">Emergency contact</span>
-                  <span className="mt-1 block font-semibold">{siteConfig.policies.emergencyContact}</span>
+                  <span className="mt-1 block font-semibold">{settings.policies.emergencyContact}</span>
                 </p>
               )}
             </section>
@@ -430,16 +437,16 @@ function IncludeList({ title, items, kind }: { title: string; items: string[]; k
   );
 }
 
-function BreadcrumbJsonLd({ trek }: { trek: Trek }) {
-  const home = absoluteUrl("/");
+function BreadcrumbJsonLd({ trek, siteUrl }: { trek: Trek; siteUrl: string | null }) {
+  const home = absoluteUrl("/", siteUrl);
   if (!home) return null; // Only emit structured data when the production domain is configured.
   const data = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: home },
-      { "@type": "ListItem", position: 2, name: "Treks", item: absoluteUrl("/treks") },
-      { "@type": "ListItem", position: 3, name: trek.name, item: absoluteUrl(`/treks/${trek.slug}`) },
+      { "@type": "ListItem", position: 2, name: "Treks", item: absoluteUrl("/treks", siteUrl) },
+      { "@type": "ListItem", position: 3, name: trek.name, item: absoluteUrl(`/treks/${trek.slug}`, siteUrl) },
     ],
   };
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;

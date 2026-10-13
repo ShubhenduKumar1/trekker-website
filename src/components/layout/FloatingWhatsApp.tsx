@@ -10,10 +10,10 @@ import { buildWhatsAppLink, generalEnquiryMessage } from "@/lib/whatsapp";
  * Floating general-enquiry button. Hidden on trek pages (they have their own
  * booking bar) and on the contact page, and only shown after scrolling a little.
  */
-export function FloatingWhatsApp() {
+export function FloatingWhatsApp({ whatsappNumber }: { whatsappNumber: string | null }) {
   const pathname = usePathname() ?? "/";
   const [visible, setVisible] = useState(false);
-  const link = buildWhatsAppLink(generalEnquiryMessage());
+  const link = buildWhatsAppLink(generalEnquiryMessage(), whatsappNumber);
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);

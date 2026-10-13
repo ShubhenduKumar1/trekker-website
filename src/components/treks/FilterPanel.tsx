@@ -11,7 +11,7 @@ import {
   facetCount,
   type TrekFilters,
 } from "@/lib/filters";
-import { getStartingPrice } from "@/lib/treks";
+import { getStartingPrice } from "@/lib/trek-pricing";
 import { cn } from "@/lib/format";
 
 type Props = {

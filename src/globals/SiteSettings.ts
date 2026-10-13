@@ -1,13 +1,17 @@
 import type { GlobalConfig } from "payload";
+import { revalidateGlobalOnChange } from "@/hooks/revalidate";
 
 /**
- * Mirrors src/config/site.ts (siteConfig). Your admin edits brand, contact
- * and guide-profile details here instead of touching code.
+ * Brand, contact and guide-profile details, editable in /admin instead of
+ * in code (this used to be src/config/site.ts, now removed).
  */
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobalOnChange],
   },
   fields: [
     { name: "brandName", type: "text", required: true },

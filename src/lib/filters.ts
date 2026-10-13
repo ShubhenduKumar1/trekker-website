@@ -1,5 +1,5 @@
 import type { Difficulty, Season, StateName, Trek } from "@/types/trek";
-import { getStartingPrice } from "@/lib/treks";
+import { getStartingPrice } from "@/lib/trek-pricing";
 
 /* ── Filter vocabulary ────────────────────────────────────────────────────── */
 

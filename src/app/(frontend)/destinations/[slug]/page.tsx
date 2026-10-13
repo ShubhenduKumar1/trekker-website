@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { destinations, getDestinationBySlug } from "@/data/destinations";
+import { getDestinations, getDestinationBySlug } from "@/lib/destinations";
 import { getTreksByState } from "@/lib/treks";
 import { pageMetadata } from "@/lib/seo";
 import { generalEnquiryMessage } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/site-settings";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TrekGrid } from "@/components/treks/TrekGrid";
 import { SafeImage } from "@/components/ui/SafeImage";
@@ -16,9 +17,10 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { btn, arrowNudge } from "@/lib/ui";
 import { cn } from "@/lib/format";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
+// Known destinations are pre-rendered at build time; any added later in
+// /admin render on first request and are then cached (see revalidate in layout.tsx).
+export async function generateStaticParams() {
+  const destinations = await getDestinations();
   return destinations.map((d) => ({ slug: d.slug }));
 }
 
@@ -26,21 +28,23 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const d = getDestinationBySlug(slug);
+  const [d, settings] = await Promise.all([getDestinationBySlug(slug), getSiteSettings()]);
   if (!d) return {};
   return pageMetadata({
     title: `Treks in ${d.state}`,
     description: `${d.intro} Explore guided treks in ${d.state} and enquire on WhatsApp.`,
     path: `/destinations/${d.slug}`,
     image: d.image,
+    siteUrl: settings.siteUrl,
+    brandName: settings.brandName,
   });
 }
 
 export default async function DestinationPage({ params }: Props) {
   const { slug } = await params;
-  const d = getDestinationBySlug(slug);
+  const d = await getDestinationBySlug(slug);
   if (!d) notFound();
-  const treks = getTreksByState(d.state);
+  const [treks, destinations, settings] = await Promise.all([getTreksByState(d.state), getDestinations(), getSiteSettings()]);
   const other = destinations.find((x) => x.slug !== d.slug);
 
   return (
@@ -89,7 +93,7 @@ export default async function DestinationPage({ params }: Props) {
       </section>
 
       <CtaCard title="Not sure which trek suits you?" text="Share your experience and dates — we’ll help you choose.">
-        <WhatsAppButton message={generalEnquiryMessage()} className={onAccent.solid}>
+        <WhatsAppButton message={generalEnquiryMessage()} whatsappNumber={settings.whatsappNumber} className={onAccent.solid}>
           Ask on WhatsApp
         </WhatsAppButton>
         {other && (

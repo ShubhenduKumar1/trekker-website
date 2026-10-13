@@ -1,13 +1,18 @@
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/layout/PageHeader";
 
-export const metadata = pageMetadata({
-  title: "Privacy Policy",
-  description: `How ${siteConfig.brandName} handles your information.`,
-  path: "/privacy",
-});
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  return pageMetadata({
+    title: "Privacy Policy",
+    description: `How ${settings.brandName} handles your information.`,
+    path: "/privacy",
+    siteUrl: settings.siteUrl,
+    brandName: settings.brandName,
+  });
+}
 
 /**
  * Describes what THIS codebase does as shipped. If you add analytics, forms,

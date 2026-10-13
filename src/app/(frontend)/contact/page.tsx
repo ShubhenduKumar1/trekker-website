@@ -1,20 +1,26 @@
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { pageMetadata } from "@/lib/seo";
 import { buildWhatsAppLink, generalEnquiryMessage } from "@/lib/whatsapp";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ContactPlanner } from "@/components/contact/ContactPlanner";
 import { DevNotice } from "@/components/ui/DevNotice";
 
-export const metadata = pageMetadata({
-  title: "Contact & Plan Your Trek",
-  description: `Get in touch with ${siteConfig.brandName} to plan a trek in Himachal Pradesh or Uttarakhand.`,
-  path: "/contact",
-});
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  return pageMetadata({
+    title: "Contact & Plan Your Trek",
+    description: `Get in touch with ${settings.brandName} to plan a trek in Himachal Pradesh or Uttarakhand.`,
+    path: "/contact",
+    siteUrl: settings.siteUrl,
+    brandName: settings.brandName,
+  });
+}
 
-export default function ContactPage() {
-  const wa = buildWhatsAppLink(generalEnquiryMessage());
-  const { email, phoneDisplay, baseLocation, social } = siteConfig;
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
+  const wa = buildWhatsAppLink(generalEnquiryMessage(), settings.whatsappNumber);
+  const { email, phoneDisplay, baseLocation, social } = settings;
   const methods = [
     wa.configured && { icon: MessageCircle, label: "WhatsApp", value: "Chat with us", href: wa.href, external: true },
     phoneDisplay && { icon: Phone, label: "Phone", value: phoneDisplay, href: `tel:${phoneDisplay.replace(/[^\d+]/g, "")}` },
@@ -33,7 +39,7 @@ export default function ContactPage() {
       <section className="pb-24">
         <div className="container-page grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <ContactPlanner />
+            <ContactPlanner whatsappNumber={settings.whatsappNumber} />
           </div>
           <div className="lg:col-span-5">
             <h2 className="font-display text-display-sm text-ink">Other ways to reach us</h2>
@@ -75,7 +81,7 @@ export default function ContactPage() {
                 ))}
               </ul>
             )}
-            <DevNotice className="mt-6">Contact methods come from src/config/site.ts and NEXT_PUBLIC_WHATSAPP_NUMBER.</DevNotice>
+            <DevNotice className="mt-6">Contact methods come from /admin → Site Settings.</DevNotice>
           </div>
         </div>
       </section>

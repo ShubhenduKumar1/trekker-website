@@ -21,8 +21,10 @@ export const NAV_LINKS = [
 
 const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
 
+type WordmarkProps = { logoSrc: string | null; brandName: string; wordmark: { primary: string; secondary: string } };
+
 /** Floating pill navigation. Narrows slightly once the page is scrolled. */
-export function Navbar() {
+export function Navbar({ wordmark }: { wordmark: WordmarkProps }) {
   const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -98,7 +100,7 @@ export function Navbar() {
           )}
         >
           <Link href="/" className="shrink-0 rounded-md" aria-label="Home">
-            <Wordmark />
+            <Wordmark logoSrc={wordmark.logoSrc} brandName={wordmark.brandName} wordmark={wordmark.wordmark} />
           </Link>
 
           <ul className="hidden items-center lg:flex xl:gap-1">

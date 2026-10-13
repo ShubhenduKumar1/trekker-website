@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
-import type { GalleryItem } from "@/data/gallery";
+import type { GalleryItem } from "@/lib/gallery";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";

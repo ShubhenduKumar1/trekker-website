@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /** Mirrors src/data/gallery.ts. Powers the homepage photo gallery. */
 export const GalleryItems: CollectionConfig = {
@@ -9,6 +10,10 @@ export const GalleryItems: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     { name: "image", type: "upload", relationTo: "media", required: true },

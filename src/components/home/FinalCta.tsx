@@ -4,12 +4,13 @@ import { generalEnquiryMessage } from "@/lib/whatsapp";
 import { Reveal } from "@/components/ui/Reveal";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { DevNotice } from "@/components/ui/DevNotice";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { btn, arrowNudge } from "@/lib/ui";
 import { cn } from "@/lib/format";
 
 /** Accent call-to-action band with a dotted pattern. */
-export function FinalCta() {
+export async function FinalCta() {
+  const { whatsappNumber } = await getSiteSettings();
   return (
     <section id="plan" aria-labelledby="cta-title" className="pb-20 sm:pb-28">
       <div className="container-page">
@@ -29,6 +30,7 @@ export function FinalCta() {
               </Link>
               <WhatsAppButton
                 message={generalEnquiryMessage()}
+                whatsappNumber={whatsappNumber}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/40 px-7 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:opacity-60"
               >
                 Plan on WhatsApp
@@ -36,9 +38,9 @@ export function FinalCta() {
             </div>
           </div>
         </Reveal>
-        {!siteConfig.whatsappNumber && (
+        {!whatsappNumber && (
           <DevNotice className="mx-auto mt-4 max-w-md">
-            WhatsApp buttons are disabled until NEXT_PUBLIC_WHATSAPP_NUMBER is set. In production they link to /contact instead.
+            WhatsApp buttons are disabled until a WhatsApp number is set in /admin → Site Settings. In production they link to /contact instead.
           </DevNotice>
         )}
       </div>

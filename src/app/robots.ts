@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 
-export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export default function robots(): MetadataRoute.Robots {
-  const base = siteConfig.siteUrl?.replace(/\/$/, "");
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const settings = await getSiteSettings();
+  const base = settings.siteUrl?.replace(/\/$/, "");
   return {
     rules: { userAgent: "*", allow: "/" },
     ...(base ? { sitemap: `${base}/sitemap.xml` } : {}),

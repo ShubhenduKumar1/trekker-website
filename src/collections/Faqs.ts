@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /** Mirrors src/data/faqs.ts (generalFaqs). Shown on the homepage FAQ section. */
 export const Faqs: CollectionConfig = {
@@ -8,6 +9,10 @@ export const Faqs: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     { name: "question", type: "text", required: true },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { destinations } from "@/data/destinations";
+import { getDestinations } from "@/lib/destinations";
 import { getTreksByState } from "@/lib/treks";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Reveal } from "@/components/ui/Reveal";
@@ -8,7 +8,9 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { btn, arrowNudge } from "@/lib/ui";
 import { cn, formatDurationShort } from "@/lib/format";
 
-export function DestinationsSection() {
+export async function DestinationsSection() {
+  const destinations = await getDestinations();
+  const treksByDestination = await Promise.all(destinations.map((d) => getTreksByState(d.state)));
   return (
     <section aria-labelledby="destinations-title" className="section-y">
       <div className="container-page">
@@ -22,7 +24,7 @@ export function DestinationsSection() {
 
         <div className="mt-14 grid gap-5 lg:grid-cols-2">
           {destinations.map((d, i) => {
-            const treks = getTreksByState(d.state);
+            const treks = treksByDestination[i];
             return (
               <Reveal as="article" key={d.slug} delay={i * 0.08} aria-labelledby={`dest-${d.slug}`} className="card flex flex-col p-2">
                 <div className="relative aspect-[16/10] overflow-hidden rounded-[1.4rem] bg-canvas">

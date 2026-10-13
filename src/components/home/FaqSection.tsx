@@ -1,9 +1,10 @@
-import { generalFaqs } from "@/data/faqs";
+import { getGeneralFaqs } from "@/lib/faqs";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import { FaqCard, HomeFaqFooter } from "@/components/home/HomeFaq";
 
-export function FaqSection() {
+export async function FaqSection() {
+  const generalFaqs = await getGeneralFaqs();
   return (
     <section aria-labelledby="faq-title" className="section-y">
       <div className="container-page">

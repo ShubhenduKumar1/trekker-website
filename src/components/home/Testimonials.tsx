@@ -1,5 +1,5 @@
 import { Quote } from "lucide-react";
-import { testimonials } from "@/data/testimonials";
+import { getTestimonials } from "@/lib/testimonials";
 import { Reveal } from "@/components/ui/Reveal";
 import { DevNotice } from "@/components/ui/DevNotice";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -8,12 +8,13 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
  * Shows real testimonials only. With none configured, visitors see nothing;
  * developers see a reminder.
  */
-export function Testimonials() {
+export async function Testimonials() {
+  const testimonials = await getTestimonials();
   if (!testimonials.length) {
     return (
       <div className="container-page">
         <DevNotice className="my-6">
-          Testimonials are hidden until you add real, permitted customer feedback in src/data/testimonials.ts.
+          Testimonials are hidden until you add real, permitted customer feedback in /admin → Testimonials.
         </DevNotice>
       </div>
     );

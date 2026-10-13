@@ -16,6 +16,11 @@ export type Photo = {
   alt: string;
 };
 
+export type SocialLink = {
+  label: "Instagram" | "YouTube" | "Facebook" | "X" | "LinkedIn";
+  url: string;
+};
+
 export type TrekDay = {
   day: number;
   title: string;

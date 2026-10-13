@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /** Mirrors src/data/destinations.ts. Powers /destinations/[slug]. */
 export const Destinations: CollectionConfig = {
@@ -8,6 +9,10 @@ export const Destinations: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

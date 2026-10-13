@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
-import { isDev } from "@/config/site";
+import { isDev } from "@/lib/env";
 import { cn } from "@/lib/format";
 
 type Props = {
   message: string;
+  whatsappNumber: string | null;
   children: React.ReactNode;
   className?: string;
   /** Hide the chat icon. */
@@ -21,8 +22,8 @@ type Props = {
  * - development: a disabled button with an explanation (no broken URL)
  * - production:  falls back to the /contact page
  */
-export function WhatsAppButton({ message, children, className, noIcon, ariaLabel }: Props) {
-  const link = buildWhatsAppLink(message);
+export function WhatsAppButton({ message, whatsappNumber, children, className, noIcon, ariaLabel }: Props) {
+  const link = buildWhatsAppLink(message, whatsappNumber);
   const icon = noIcon ? null : <MessageCircle aria-hidden className="size-[1.1em]" strokeWidth={2.2} />;
 
   if (link.configured) {
@@ -46,7 +47,7 @@ export function WhatsAppButton({ message, children, className, noIcon, ariaLabel
         type="button"
         disabled
         className={cn(className, "relative")}
-        title="Set NEXT_PUBLIC_WHATSAPP_NUMBER (see README) to enable WhatsApp enquiries."
+        title="Set a WhatsApp number in /admin → Site Settings to enable WhatsApp enquiries."
       >
         {icon}
         {children}

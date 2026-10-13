@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import type { Trek, TrekPackage } from "@/types/trek";
 import { buildWhatsAppLink, trekEnquiryMessage, type WhatsAppLink } from "@/lib/whatsapp";
-import { getStartingPrice } from "@/lib/treks";
+import { getStartingPrice } from "@/lib/trek-pricing";
 
 type BookingState = {
   trek: Trek;
@@ -20,7 +20,15 @@ type BookingState = {
 
 const BookingCtx = createContext<BookingState | null>(null);
 
-export function BookingProvider({ trek, children }: { trek: Trek; children: React.ReactNode }) {
+export function BookingProvider({
+  trek,
+  whatsappNumber,
+  children,
+}: {
+  trek: Trek;
+  whatsappNumber: string | null;
+  children: React.ReactNode;
+}) {
   const [packageId, setPackageId] = useState(trek.packages[0]?.id ?? "");
   const [preferredDate, setPreferredDate] = useState("");
   const [participants, setParticipants] = useState<number | null>(null);
@@ -38,9 +46,9 @@ export function BookingProvider({ trek, children }: { trek: Trek; children: Reac
       participants,
       setParticipants,
       price,
-      whatsapp: buildWhatsAppLink(message),
+      whatsapp: buildWhatsAppLink(message, whatsappNumber),
     };
-  }, [trek, packageId, preferredDate, participants]);
+  }, [trek, packageId, preferredDate, participants, whatsappNumber]);
 
   return <BookingCtx.Provider value={value}>{children}</BookingCtx.Provider>;
 }

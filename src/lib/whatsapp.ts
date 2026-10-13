@@ -1,4 +1,3 @@
-import { siteConfig } from "@/config/site";
 import type { Trek, TrekPackage } from "@/types/trek";
 import { formatDate, formatDuration } from "@/lib/format";
 
@@ -14,11 +13,12 @@ export type WhatsAppLink =
   | { configured: true; href: string; message: string }
   | { configured: false; href: null; message: string };
 
-/** Builds an official click-to-chat link. Returns `configured: false` instead of a broken URL. */
-export function buildWhatsAppLink(
-  message: string,
-  rawNumber: string | null | undefined = siteConfig.whatsappNumber,
-): WhatsAppLink {
+/**
+ * Builds an official click-to-chat link. Returns `configured: false` instead of a broken URL.
+ * The number now comes from Payload (via getSiteSettings()) rather than a module-level default —
+ * callers must pass it explicitly.
+ */
+export function buildWhatsAppLink(message: string, rawNumber: string | null | undefined): WhatsAppLink {
   const number = normalizeWhatsAppNumber(rawNumber);
   if (!number) return { configured: false, href: null, message };
   return {

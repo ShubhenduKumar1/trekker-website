@@ -14,7 +14,15 @@ import { formatDuration, cn } from "@/lib/format";
 
 type RegionCount = { slug: string; name: string; count: number };
 
-export function Hero({ featured, regions }: { featured?: Trek; regions: RegionCount[] }) {
+export function Hero({
+  featured,
+  regions,
+  whatsappNumber,
+}: {
+  featured?: Trek;
+  regions: RegionCount[];
+  whatsappNumber: string | null;
+}) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const [finePointer, setFinePointer] = useState(false);
@@ -56,7 +64,7 @@ export function Hero({ featured, regions }: { featured?: Trek; regions: RegionCo
           <Link href="/treks" className={cn(btn.primary, "px-7")}>
             Explore Treks <ArrowRight aria-hidden className={cn("size-4", arrowNudge)} />
           </Link>
-          <PlanLink className={cn(btn.secondary, "px-7")} fallbackHref="#plan">
+          <PlanLink className={cn(btn.secondary, "px-7")} fallbackHref="#plan" whatsappNumber={whatsappNumber}>
             Plan Your Adventure
           </PlanLink>
         </div>

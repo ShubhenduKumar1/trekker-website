@@ -1,12 +1,22 @@
-import { siteConfig } from "@/config/site";
+import { getSiteSettings } from "@/lib/site-settings";
 import { pageMetadata } from "@/lib/seo";
 import { PolicyPage } from "@/components/layout/PolicyPage";
 
-export const metadata = {
-  ...pageMetadata({ title: "Cancellation Policy", description: `Cancellation policy for treks with ${siteConfig.brandName}.`, path: "/cancellation-policy" }),
-  ...(siteConfig.policies.cancellation ? {} : { robots: { index: false } }),
-};
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  return {
+    ...pageMetadata({
+      title: "Cancellation Policy",
+      description: `Cancellation policy for treks with ${settings.brandName}.`,
+      path: "/cancellation-policy",
+      siteUrl: settings.siteUrl,
+      brandName: settings.brandName,
+    }),
+    ...(settings.policies.cancellation ? {} : { robots: { index: false } }),
+  };
+}
 
-export default function CancellationPage() {
-  return <PolicyPage title="Cancellation Policy" paragraphs={siteConfig.policies.cancellation} configKey="cancellation" />;
+export default async function CancellationPage() {
+  const settings = await getSiteSettings();
+  return <PolicyPage title="Cancellation Policy" paragraphs={settings.policies.cancellation} configKey="cancellation" />;
 }

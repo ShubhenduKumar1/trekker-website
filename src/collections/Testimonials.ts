@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /**
  * Mirrors src/data/testimonials.ts. Real customer feedback only — the
@@ -11,6 +12,10 @@ export const Testimonials: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     { name: "name", type: "text", required: true },

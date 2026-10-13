@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
 
 /** Mirrors src/types/trek.ts (Trek) and src/data/treks.ts. */
 export const Treks: CollectionConfig = {
@@ -9,6 +10,10 @@ export const Treks: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

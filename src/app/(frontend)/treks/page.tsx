@@ -1,22 +1,28 @@
 import { Suspense } from "react";
 import { getAllTreks } from "@/lib/treks";
 import { pageMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/site-settings";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TrekExplorer } from "@/components/treks/TrekExplorer";
 import { TrekCard } from "@/components/treks/TrekCard";
 import { DevNotice } from "@/components/ui/DevNotice";
 import { photos } from "@/data/images";
 
-export const metadata = pageMetadata({
-  title: "Explore Himalayan Treks",
-  description:
-    "Browse guided treks in Himachal Pradesh and Uttarakhand. Filter by region, difficulty, duration and season, then view full itineraries.",
-  path: "/treks",
-  image: photos.summitView,
-});
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  return pageMetadata({
+    title: "Explore Himalayan Treks",
+    description:
+      "Browse guided treks in Himachal Pradesh and Uttarakhand. Filter by region, difficulty, duration and season, then view full itineraries.",
+    path: "/treks",
+    image: photos.summitView,
+    siteUrl: settings.siteUrl,
+    brandName: settings.brandName,
+  });
+}
 
-export default function TreksPage() {
-  const catalog = getAllTreks();
+export default async function TreksPage() {
+  const catalog = await getAllTreks();
   const hasSamples = catalog.some((t) => t.status === "sample");
 
   return (
@@ -31,7 +37,7 @@ export default function TreksPage() {
         <div className="container-page">
           {hasSamples && (
             <DevNotice className="mb-6">
-              Some treks are marked as sample data (status: &quot;sample&quot; in src/data/treks.ts). Review and verify them before launch.
+              Some treks are marked as sample data (status: &quot;sample&quot; in /admin → Treks). Review and verify them before launch.
             </DevNotice>
           )}
           {/* Fallback renders the full catalog for no-JS and first paint; the explorer takes over once loaded. */}

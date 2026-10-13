@@ -4,7 +4,7 @@ import type { Trek } from "@/types/trek";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { DifficultyMeter } from "@/components/treks/DifficultyMeter";
 import { formatAltitude, formatDuration, formatPrice, PRICE_FALLBACK, cn } from "@/lib/format";
-import { getStartingPrice } from "@/lib/treks";
+import { getStartingPrice } from "@/lib/trek-pricing";
 
 type Props = {
   trek: Trek;

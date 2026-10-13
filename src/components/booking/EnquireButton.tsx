@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { useBooking } from "@/components/booking/BookingContext";
-import { isDev } from "@/config/site";
+import { isDev } from "@/lib/env";
 import { cn } from "@/lib/format";
 
 /** WhatsApp CTA that always reflects the visitor's current selections. */
@@ -35,7 +35,7 @@ export function EnquireButton({ className, children = "Enquire on WhatsApp" }: {
         type="button"
         disabled
         className={cn(className)}
-        title="Set NEXT_PUBLIC_WHATSAPP_NUMBER (see README) to enable WhatsApp enquiries."
+        title="Set a WhatsApp number in /admin → Site Settings to enable WhatsApp enquiries."
       >
         {content}
         <span className="sr-only"> (WhatsApp number not configured)</span>

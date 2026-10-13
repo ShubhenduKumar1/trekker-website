@@ -1,5 +1,5 @@
 import { TriangleAlert } from "lucide-react";
-import { isDev } from "@/config/site";
+import { isDev } from "@/lib/env";
 import { cn } from "@/lib/format";
 
 /** A configuration reminder that only renders in development builds. */
