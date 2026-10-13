@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { draftMode } from "next/headers";
 import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { getDestinations, getDestinationBySlug } from "@/lib/destinations";
@@ -16,6 +17,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CtaCard, onAccent } from "@/components/ui/CtaCard";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { RefreshRouteOnSave } from "@/components/payload/RefreshRouteOnSave";
+import { DraftModeBanner } from "@/components/payload/DraftModeBanner";
 import { btn, arrowNudge } from "@/lib/ui";
 import { cn } from "@/lib/format";
 
@@ -30,7 +32,8 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [d, settings] = await Promise.all([getDestinationBySlug(slug), getSiteSettings()]);
+  const { isEnabled: draft } = await draftMode();
+  const [d, settings] = await Promise.all([getDestinationBySlug(slug, draft), getSiteSettings()]);
   if (!d) return {};
   return pageMetadata({
     // d.meta comes from @payloadcms/plugin-seo — an admin override in
@@ -46,7 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DestinationPage({ params }: Props) {
   const { slug } = await params;
-  const d = await getDestinationBySlug(slug);
+  const { isEnabled: draft } = await draftMode();
+  const d = await getDestinationBySlug(slug, draft);
   if (!d) {
     const redirectTo = await getRedirectFor(`/destinations/${slug}`);
     if (redirectTo) {
@@ -61,6 +65,7 @@ export default async function DestinationPage({ params }: Props) {
   return (
     <>
       <RefreshRouteOnSave />
+      {draft && <DraftModeBanner />}
       <PageHeader eyebrow={d.eyebrow} title={`Trekking in ${d.state}.`} titleMuted={d.tagline} intro={d.intro} image={d.image}>
         <p className="text-sm font-medium text-muted">
           {treks.length === 0 ? "Treks coming soon" : `${treks.length} ${treks.length === 1 ? "trek" : "treks"} in this region`}

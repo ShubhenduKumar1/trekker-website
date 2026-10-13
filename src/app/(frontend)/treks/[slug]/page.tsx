@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { draftMode } from "next/headers";
 import { notFound, permanentRedirect, redirect } from "next/navigation";
 import {
   ArrowLeft,
@@ -41,6 +42,7 @@ import { PackageSelector } from "@/components/booking/PackageSelector";
 import { PackingList } from "@/components/trek/PackingList";
 import { FaqList } from "@/components/trek/FaqList";
 import { RefreshRouteOnSave } from "@/components/payload/RefreshRouteOnSave";
+import { DraftModeBanner } from "@/components/payload/DraftModeBanner";
 
 // Known treks are pre-rendered at build time; a trek added later in /admin
 // renders on first request and is then cached (see revalidate in layout.tsx).
@@ -53,7 +55,8 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [trek, settings] = await Promise.all([getTrekBySlug(slug), getSiteSettings()]);
+  const { isEnabled: draft } = await draftMode();
+  const [trek, settings] = await Promise.all([getTrekBySlug(slug, draft), getSiteSettings()]);
   if (!trek) return { title: "Trek not found" };
   return pageMetadata({
     // trek.meta comes from @payloadcms/plugin-seo — an admin override in
@@ -80,7 +83,8 @@ const SECTIONS = [
 
 export default async function TrekPage({ params }: Props) {
   const { slug } = await params;
-  const trek = await getTrekBySlug(slug);
+  const { isEnabled: draft } = await draftMode();
+  const trek = await getTrekBySlug(slug, draft);
   if (!trek) {
     const redirectTo = await getRedirectFor(`/treks/${slug}`);
     if (redirectTo) {
@@ -104,6 +108,7 @@ export default async function TrekPage({ params }: Props) {
   return (
     <BookingProvider trek={trek} whatsappNumber={settings.whatsappNumber}>
       <RefreshRouteOnSave />
+      {draft && <DraftModeBanner />}
       <BreadcrumbJsonLd trek={trek} siteUrl={settings.siteUrl} />
 
       {/* ── A. Hero ─────────────────────────────────────────────────────── */}

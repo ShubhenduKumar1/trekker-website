@@ -1,20 +1,33 @@
 import type { CollectionConfig } from "payload";
 import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
-import { siteUrl } from "@/lib/site-url";
+import { previewUrl } from "@/lib/site-url";
 
 /** Mirrors src/types/trek.ts (Trek) and src/data/treks.ts. */
 export const Treks: CollectionConfig = {
   slug: "treks",
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "state", "difficulty", "status"],
+    defaultColumns: ["name", "state", "difficulty", "contentStatus"],
     livePreview: {
-      url: ({ data }) => `${siteUrl()}/treks/${data.slug}`,
+      url: ({ data }) => previewUrl(`/treks/${data.slug}`),
     },
-    preview: (data) => `${siteUrl()}/treks/${data.slug}`,
+    preview: (data) => previewUrl(`/treks/${data.slug}`),
+  },
+  versions: {
+    drafts: {
+      // Debounced autosave while editing — pairs with Live Preview so the
+      // iframe updates every ~1s instead of only on an explicit save.
+      autosave: { interval: 1000 },
+    },
   },
   access: {
-    read: () => true,
+    // Logged-in admins (incl. Live Preview / the Local API, which bypasses
+    // this anyway) see drafts; the public REST/GraphQL API only ever sees
+    // published treks.
+    read: ({ req }) => {
+      if (req.user) return true;
+      return { _status: { equals: "published" } };
+    },
   },
   hooks: {
     afterChange: [revalidateOnChange],
@@ -154,7 +167,13 @@ export const Treks: CollectionConfig = {
     },
     { name: "featured", type: "checkbox", defaultValue: false },
     {
-      name: "status",
+      // Named contentStatus, not status: Payload's own draft/published
+      // tracking field is `_status`, and the Postgres adapter strips the
+      // leading underscore when naming its generated enum type — a field
+      // literally named `status` collides with it once drafts are enabled
+      // (silently corrupts the versions-table enum). Renaming avoids it.
+      name: "contentStatus",
+      label: "Status",
       type: "select",
       required: true,
       defaultValue: "sample",

@@ -41,10 +41,16 @@ export const getDestinations = cache(async (): Promise<Destination[]> => {
   return docs.map(toDestination);
 });
 
-export async function getDestinationBySlug(slug: string): Promise<Destination | undefined> {
-  const destinations = await getDestinations();
-  return destinations.find((d) => d.slug === slug);
-}
+/**
+ * Looks up one destination directly (not via getDestinations()) so `draft`
+ * can be passed through — pass `true` only from inside Next's Draft Mode
+ * (see destinations/[slug]/page.tsx), never for a normal visitor fetch.
+ */
+export const getDestinationBySlug = cache(async (slug: string, draft = false): Promise<Destination | undefined> => {
+  const payload = await getPayloadClient();
+  const { docs } = await payload.find({ collection: "destinations", where: { slug: { equals: slug } }, draft, limit: 1 });
+  return docs[0] ? toDestination(docs[0]) : undefined;
+});
 
 export async function getDestinationByState(state: StateName): Promise<Destination> {
   const destinations = await getDestinations();

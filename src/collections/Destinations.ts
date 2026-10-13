@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { revalidateOnChange, revalidateOnDelete } from "@/hooks/revalidate";
-import { siteUrl } from "@/lib/site-url";
+import { previewUrl } from "@/lib/site-url";
 
 /** Mirrors src/data/destinations.ts. Powers /destinations/[slug]. */
 export const Destinations: CollectionConfig = {
@@ -8,12 +8,20 @@ export const Destinations: CollectionConfig = {
   admin: {
     useAsTitle: "state",
     livePreview: {
-      url: ({ data }) => `${siteUrl()}/destinations/${data.slug}`,
+      url: ({ data }) => previewUrl(`/destinations/${data.slug}`),
     },
-    preview: (data) => `${siteUrl()}/destinations/${data.slug}`,
+    preview: (data) => previewUrl(`/destinations/${data.slug}`),
+  },
+  versions: {
+    drafts: {
+      autosave: { interval: 1000 },
+    },
   },
   access: {
-    read: () => true,
+    read: ({ req }) => {
+      if (req.user) return true;
+      return { _status: { equals: "published" } };
+    },
   },
   hooks: {
     afterChange: [revalidateOnChange],

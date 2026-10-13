@@ -73,7 +73,7 @@ function toTrek(doc: TrekDoc): Trek {
     packingList: (doc.packingList ?? []).map((g: TrekDoc) => ({ category: g.category, items: unwrapValues(g.items) })),
     faqs: (doc.faqs ?? []) as Faq[],
     featured: doc.featured ?? false,
-    status: doc.status,
+    status: doc.contentStatus,
     meta: toSeoMeta(doc.meta),
   };
 }
@@ -85,11 +85,17 @@ export const getAllTreks = cache(async (): Promise<Trek[]> => {
   return docs.map(toTrek);
 });
 
-export async function getTrekBySlug(slug: string | null | undefined): Promise<Trek | undefined> {
+/**
+ * Looks up one trek directly (not via getAllTreks()) so `draft` can be
+ * passed through — pass `true` only from inside Next's Draft Mode (see
+ * treks/[slug]/page.tsx), never for a normal visitor-facing fetch.
+ */
+export const getTrekBySlug = cache(async (slug: string | null | undefined, draft = false): Promise<Trek | undefined> => {
   if (!slug) return undefined;
-  const treks = await getAllTreks();
-  return treks.find((t) => t.slug === slug);
-}
+  const payload = await getPayloadClient();
+  const { docs } = await payload.find({ collection: "treks", where: { slug: { equals: slug } }, draft, limit: 1 });
+  return docs[0] ? toTrek(docs[0]) : undefined;
+});
 
 export async function getTreksByState(state: StateName): Promise<Trek[]> {
   const treks = await getAllTreks();

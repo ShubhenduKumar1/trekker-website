@@ -176,7 +176,7 @@ async function run() {
         })),
         faqs: t.faqs,
         featured: t.featured ?? false,
-        status: t.status,
+        contentStatus: t.status,
       },
     });
   }
