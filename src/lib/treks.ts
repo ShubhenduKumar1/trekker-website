@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { getPayloadClient } from "@/lib/payload-client";
-import { mediaToPhoto, unwrapValues, unwrapTexts } from "@/lib/media";
+import { mediaToPhoto, toSeoMeta, unwrapValues, unwrapTexts } from "@/lib/media";
 import type { Faq, Photo, StateName, Trek, TrekDay, TrekPackage } from "@/types/trek";
 
 const FALLBACK_PHOTO: Photo = { src: "", alt: "" };
@@ -74,6 +74,7 @@ function toTrek(doc: TrekDoc): Trek {
     faqs: (doc.faqs ?? []) as Faq[],
     featured: doc.featured ?? false,
     status: doc.status,
+    meta: toSeoMeta(doc.meta),
   };
 }
 

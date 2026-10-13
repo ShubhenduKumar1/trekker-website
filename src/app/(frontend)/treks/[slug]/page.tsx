@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import {
   ArrowLeft,
   BedDouble,
@@ -25,6 +25,7 @@ import { getDestinationByState } from "@/lib/destinations";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
 import { formatAltitude, formatDistance, formatDuration, formatPrice, PRICE_FALLBACK, cn } from "@/lib/format";
 import { getSiteSettings } from "@/lib/site-settings";
+import { getRedirectFor } from "@/lib/redirects";
 import { btn } from "@/lib/ui";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Reveal } from "@/components/ui/Reveal";
@@ -54,10 +55,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const [trek, settings] = await Promise.all([getTrekBySlug(slug), getSiteSettings()]);
   if (!trek) return { title: "Trek not found" };
   return pageMetadata({
-    title: `${trek.name} — ${trek.state}`,
-    description: `${trek.summary} ${formatDuration(trek.durationDays)}, ${trek.difficulty.toLowerCase()} difficulty. View the itinerary and enquire on WhatsApp.`,
+    // trek.meta comes from @payloadcms/plugin-seo — an admin override in
+    // /admin takes precedence over the auto-generated title/description/image.
+    title: trek.meta?.title ?? `${trek.name} — ${trek.state}`,
+    description:
+      trek.meta?.description ??
+      `${trek.summary} ${formatDuration(trek.durationDays)}, ${trek.difficulty.toLowerCase()} difficulty. View the itinerary and enquire on WhatsApp.`,
     path: `/treks/${trek.slug}`,
-    image: trek.coverImage,
+    image: trek.meta?.image ?? trek.coverImage,
     siteUrl: settings.siteUrl,
     brandName: settings.brandName,
   });
@@ -75,7 +80,14 @@ const SECTIONS = [
 export default async function TrekPage({ params }: Props) {
   const { slug } = await params;
   const trek = await getTrekBySlug(slug);
-  if (!trek) notFound();
+  if (!trek) {
+    const redirectTo = await getRedirectFor(`/treks/${slug}`);
+    if (redirectTo) {
+      if (redirectTo.permanent) permanentRedirect(redirectTo.to);
+      redirect(redirectTo.to);
+    }
+    notFound();
+  }
 
   const [destination, related, settings] = await Promise.all([
     getDestinationByState(trek.state),

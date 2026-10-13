@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { getPayloadClient } from "@/lib/payload-client";
-import { mediaToPhoto, unwrapTexts } from "@/lib/media";
-import type { Photo, StateName } from "@/types/trek";
+import { mediaToPhoto, toSeoMeta, unwrapTexts } from "@/lib/media";
+import type { Photo, SeoMeta, StateName } from "@/types/trek";
 
 export type Destination = {
   slug: "himachal-pradesh" | "uttarakhand";
@@ -13,6 +13,8 @@ export type Destination = {
   longIntro: string[];
   image: Photo;
   secondaryImage: Photo;
+  /** SEO title/description/image overrides, set via @payloadcms/plugin-seo in /admin. */
+  meta?: SeoMeta;
 };
 
 const FALLBACK_PHOTO: Photo = { src: "", alt: "" };
@@ -29,6 +31,7 @@ function toDestination(doc: Record<string, any>): Destination {
     longIntro: unwrapTexts(doc.longIntro),
     image: mediaToPhoto(doc.image) ?? FALLBACK_PHOTO,
     secondaryImage: mediaToPhoto(doc.secondaryImage) ?? FALLBACK_PHOTO,
+    meta: toSeoMeta(doc.meta),
   };
 }
 

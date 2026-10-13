@@ -102,4 +102,12 @@ export type Trek = {
   faqs: Faq[];
   featured?: boolean;
   status: DataStatus;
+  /** SEO title/description/image overrides, set via @payloadcms/plugin-seo in /admin. */
+  meta?: SeoMeta;
+};
+
+export type SeoMeta = {
+  title?: string;
+  description?: string;
+  image?: Photo;
 };

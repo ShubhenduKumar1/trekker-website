@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { getDestinations, getDestinationBySlug } from "@/lib/destinations";
 import { getTreksByState } from "@/lib/treks";
 import { pageMetadata } from "@/lib/seo";
 import { generalEnquiryMessage } from "@/lib/whatsapp";
 import { getSiteSettings } from "@/lib/site-settings";
+import { getRedirectFor } from "@/lib/redirects";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TrekGrid } from "@/components/treks/TrekGrid";
 import { SafeImage } from "@/components/ui/SafeImage";
@@ -31,10 +32,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const [d, settings] = await Promise.all([getDestinationBySlug(slug), getSiteSettings()]);
   if (!d) return {};
   return pageMetadata({
-    title: `Treks in ${d.state}`,
-    description: `${d.intro} Explore guided treks in ${d.state} and enquire on WhatsApp.`,
+    // d.meta comes from @payloadcms/plugin-seo — an admin override in
+    // /admin takes precedence over the auto-generated title/description/image.
+    title: d.meta?.title ?? `Treks in ${d.state}`,
+    description: d.meta?.description ?? `${d.intro} Explore guided treks in ${d.state} and enquire on WhatsApp.`,
     path: `/destinations/${d.slug}`,
-    image: d.image,
+    image: d.meta?.image ?? d.image,
     siteUrl: settings.siteUrl,
     brandName: settings.brandName,
   });
@@ -43,7 +46,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DestinationPage({ params }: Props) {
   const { slug } = await params;
   const d = await getDestinationBySlug(slug);
-  if (!d) notFound();
+  if (!d) {
+    const redirectTo = await getRedirectFor(`/destinations/${slug}`);
+    if (redirectTo) {
+      if (redirectTo.permanent) permanentRedirect(redirectTo.to);
+      redirect(redirectTo.to);
+    }
+    notFound();
+  }
   const [treks, destinations, settings] = await Promise.all([getTreksByState(d.state), getDestinations(), getSiteSettings()]);
   const other = destinations.find((x) => x.slug !== d.slug);
 
