@@ -7,3 +7,7 @@ next-env.d.ts
 
 # Payload local media storage (dev only — production uses Vercel Blob)
 /media
+
+# Payload's dev server regenerates this as .js even though the real,
+# committed one is importMap.ts (see that file's comment).
+/src/app/(payload)/admin/importMap.js

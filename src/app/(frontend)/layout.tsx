@@ -40,29 +40,31 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// The actual <html>/<body> root layout is src/app/(payload)/layout.tsx —
-// Payload's admin panel needs to own those tags, so this nested layout only
-// wraps the frontend route tree and contributes metadata for it.
+// This IS a root layout (owns <html>/<body>) — (payload)/layout.tsx is a
+// separate, sibling root layout for /admin and /api/*. Route groups don't
+// share a layout tree across siblings (there's no plain app/layout.tsx tying
+// them together), so each group needs its own <html>/<body>.
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
 
   return (
-    <>
-      {/* React 19 hoists this to <head> on its own, even rendered from a nested layout. */}
+    <html lang="en-IN">
       <head>
         {/* Without JavaScript, scroll-reveal content must still be visible. */}
         <noscript>
           <style>{`[style*="opacity:0"]{opacity:1!important;transform:none!important;clip-path:none!important;filter:none!important}`}</style>
         </noscript>
       </head>
-      <MotionProvider>
-        <Navbar wordmark={{ logoSrc: settings.logoSrc, brandName: settings.brandName, wordmark: settings.wordmark }} />
-        <main id="main" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
-        <FloatingWhatsApp whatsappNumber={settings.whatsappNumber} />
-      </MotionProvider>
-    </>
+      <body>
+        <MotionProvider>
+          <Navbar wordmark={{ logoSrc: settings.logoSrc, brandName: settings.brandName, wordmark: settings.wordmark }} />
+          <main id="main" tabIndex={-1} className="outline-none">
+            {children}
+          </main>
+          <Footer />
+          <FloatingWhatsApp whatsappNumber={settings.whatsappNumber} />
+        </MotionProvider>
+      </body>
+    </html>
   );
 }
