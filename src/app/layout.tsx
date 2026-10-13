@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import { MotionProvider } from "@/components/layout/MotionProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   ...(siteConfig.siteUrl ? { metadataBase: new URL(siteConfig.siteUrl) } : {}),
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <FloatingWhatsApp />
         </MotionProvider>
+        <Analytics />
       </body>
     </html>
   );
